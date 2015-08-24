@@ -75,6 +75,7 @@
 #version 1.9.4 -- 13.03.15 moved selfurl to github
 #version 1.9.5 -- 20.03.15 added --use-git to support cloning from github
 #version 1.9.6 -- 27.06.15 added --use-hg
+#version 1.9.7 -- 23.08.15 make git the default vcs system
 
 #defaults
 usage="Usage: ${0##*/} [options] [progs]"
@@ -128,7 +129,7 @@ for i in cmake-gui ccmake cmake; do
 done
 cmake_gui="$i"
 cmake_builddir="."
-use_git=no
+use_git=yes
 
 rel=""
 selfurl="https://raw.githubusercontent.com/votca/buildutil/master/build.sh"
