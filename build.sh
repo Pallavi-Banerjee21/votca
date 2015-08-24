@@ -399,8 +399,6 @@ ADV     $(cecho GREEN --cmake) $(cecho CYAN CMD)         Use $(cecho CYAN CMD) i
 ADV                         Default: $cmake
 ADV     $(cecho GREEN --ninja)             Use ninja instead of make
 ADV                         Default: cmake's default (make)
-ADV     $(cecho GREEN --use-git)           Use git instead of hg
-ADV                         Default: $use_git
 ADV     $(cecho GREEN --use-hg)            Use hg instead of git
 ADV                         Default: $([[ $use_git = yes ]] && echo no || echo yes)
 ADV     $(cecho GREEN --builddir) $(cecho CYAN DIR)      Do an out-of-source build in $(cecho CYAN DIR)
@@ -500,9 +498,6 @@ while [[ $# -gt 0 ]]; do
      shift 2;;
    --ninja)
      cmake_opts+=( -G Ninja )
-     shift 1;;
-   --use-git)
-     use_git="yes"
      shift 1;;
    --use-hg)
      use_git="no"
@@ -691,9 +686,9 @@ for prog in "${progs[@]}"; do
   pushd "$prog" > /dev/null || die "Could not change into $prog"
   if [[ $do_update == "yes" || $do_update == "only" ]]; then
     [[ $(get_url source $prog) = *git* && -d .hg ]] && \
-      die "You cannot use git to update an hg repository, please drop the --use-git option, add the --use-hg option or re-clone $prog by removing it first ('rm -r $prog')"
+      die "You cannot use git to update an hg repository, please add the --use-hg option or re-clone $prog by removing it first ('rm -r $prog')"
     [[ $(get_url source $prog) != *git* && -d .git ]] && \
-	    die "You cannot use hg to update an git repository, please add the --use-git, drop the --use-hg option or re-clone $prog by removing it first ('rm -r $prog')"
+	    die "You cannot use hg to update an git repository, please drop the --use-hg option or re-clone $prog by removing it first ('rm -r $prog')"
     if [ -n "$rel" ]; then
       cecho BLUE "Update of a release tarball doesn't make sense, skipping"
       countdown 5
