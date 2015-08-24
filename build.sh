@@ -133,7 +133,7 @@ use_git=yes
 
 rel=""
 selfurl="https://raw.githubusercontent.com/votca/buildutil/master/build.sh"
-clurl="http://www.votca.org/development/changelog-csg"
+clurl="https://raw.githubusercontent.com/votca/csg/stable/CHANGELOG.md"
 pathname="default"
 gromacs_ver="4.6.7" #bump after 1.3 release
 
@@ -565,14 +565,12 @@ while [[ $# -gt 0 ]]; do
       die "--release option needs an argument which is a release (disable this check with --no-relcheck option)"
     shift 2;;
    -l | --latest)
-    # don't use lynx here, some distribution don't have it by default
     [[ -z $(type -p "${WGET}") ]] && die "${WGET} not found, specify it by hand using --release option"
     rel=$("${WGET}" -O - -q "${clurl}" | \
-      sed 's/Version [^ ]* /&\n/g' | \
-      sed -n 's/.*Version \([^ ]*\) .*/\1/p' | \
+      sed -n 's/^## Version \([^ ]*\) .*/\1/p' | \
       sed -n '1p')
     [[ -z $rel || ${rel} != [1-9].[0-9]?(.[1-9]|_rc[1-9]) ]] && \
-      die "lynx could not get the version (found $rel), specify it by hand using --release option"
+      die "${WGET} could not get the version (found $rel), specify it by hand using --release option"
     shift;;
    --nocolor)
     unset BLUE CYAN CYANN GREEN OFF RED PURP
@@ -839,14 +837,9 @@ for prog in "${progs[@]}"; do
       [ "$distext" = "_pristine" ] && exclude+=( --exclude src/libboost/ )
       "$HG" archive "${exclude[@]}" --type files "votca-${prog}-${ver}" || die "$HG archive failed"
       if [[ $prog = csg || $prog = ctp ]]; then
-        [[ -z $(type -p lynx) ]] && die "lynx not found"
-        lynx -dump "${clurl%-*}-${prog}" | \
-          sed -e 's/^[[:space:]]*//' | \
-          sed -ne '/^Version/,/Comments/p' | \
-          sed -e '/^Comments/d' > "votca-${prog}-${ver}"/ChangeLog
-        [[ -s votca-${prog}-${ver}/ChangeLog ]] || die "Building of ChangeLog failed"
-	[[ $changelogcheck = "yes" && -z $(grep "Version ${ver} " "votca-${prog}-${ver}"/ChangeLog) ]] && \
-          die "Go and update changelog on votca.org before make a release"
+        [[ -f votca-${prog}-${ver}/CHANGELOG.md ]] || die "No CHANGELOG.md in ${prog}"
+	[[ $changelogcheck = "yes" && -z $(grep "^## Version ${ver} " "votca-${prog}-${ver}"/CHANGELOG.md) ]] && \
+          die "Go and update CHANGELOG.md in ${prog} before making a release"
       fi
       #overwrite is the default behaviour of hg archive, emulate it!
       rm -f ../"votca-${prog}-${ver}${distext}.tar" ../"votca-${prog}-${ver}${distext}.tar.gz"
